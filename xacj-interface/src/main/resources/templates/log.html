@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>接口管理平台</title>
+    <link rel="stylesheet" type="text/css" href="/css/iview.css">
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script src="/js/vue-resource.min.js"></script>
+    <script type="text/javascript" src="/js/iview.min.js"></script>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+        .ivu-form-item {
+            margin-bottom: 0;
+        }
+
+        .ivu-input {
+            width: 200px;
+        }
+
+        .ivu-row {
+            margin-top: 10px;
+        }
+
+        .ivu-tabs {
+            height: calc(100vh - 100px);
+        }
+
+        .ivu-tabs-bar {
+            margin-bottom: 2px;
+        }
+
+        .ivu-tabs-tabpane {
+            background: #000;
+            color: white;
+            padding: 10px 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .ivu-tabs-content {
+            height: calc(100% - 32px);
+        }
+
+        .ivu-page {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <i-form :model="query" label-width="70" inline>
+        <form-item label="状态">
+            <i-select v-model="query.status" style="width:200px">
+                <i-option :value="0">成功</i-option>
+                <i-option :value="1">失败</i-option>
+            </i-select>
+        </form-item>
+        <form-item label="执行时间">
+            <date-picker :value="time" type="daterange" split-panels placeholder="Select date" style="width: 200px"
+                         @on-change="changeTime"></date-picker>
+        </form-item>
+        <form-item label="入参" label-width="40">
+            <i-input v-model="query.reqStr" placeholder="入参关键字查询"></i-input>
+        </form-item>
+        <form-item label="出参" label-width="40">
+            <i-input v-model="query.rspStr" placeholder="出参关键字查询"></i-input>
+        </form-item>
+        <form-item label="">
+            <i-button type="primary" @click="initTaskList">查询</i-button>
+            <i-button type="warning" @click="reset">重置</i-button>
+        </form-item>
+    </i-form>
+    <Row>
+        <i-col span="15">
+            <i-table highlight-row :columns="columns" :data="data" :height="tableHeight"
+                     @on-current-change="changeTableRow"></i-table>
+            <Page :total="total" show-total :current.sync="query.index" :page-size="query.size"
+                  @on-change="getTaskList"></Page>
+        </i-col>
+        <i-col span="9">
+            <Tabs type="card" :animated="false" v-model="activeTab">
+                <i-button @click="copyInfo" size="small" slot="extra">一键复制</i-button>
+                <tab-pane label="请求信息" name="a">
+                    <div v-if="formItem.requestUrl">请求地址：{{formItem.requestUrl}}</div>
+                    <div v-if="formItem.requestType">请求方式：{{formItem.requestType}}</div>
+                    <div v-if="formItem.paramsType">参数类型：{{formItem.paramsType}}</div>
+                </tab-pane>
+                <tab-pane label="入参" name="b">
+                    <pre>{{formItem.requestParams}}</pre>
+                </tab-pane>
+                <tab-pane label="出参" name="c">
+                    <pre>{{formItem.responseParams}}</pre>
+                </tab-pane>
+                <tab-pane label="异常信息" name="d">
+                    {{formItem.exceptionInfo}}
+                </tab-pane>
+            </Tabs>
+        </i-col>
+    </Row>
+
+
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                time: [],
+                query: {
+                    status: "",
+                    index: 1,
+                    size: 14,
+                    beginTime: "",
+                    endTime: "",
+                    reqStr: "",
+                    rspStr: ""
+                },
+                total: 0,
+                columns: [
+                    {
+                        title: '接口类型',
+                        key: 'type'
+                    },
+                    {
+                        title: '接口方法',
+                        key: 'method'
+                    },
+                    {
+                        title: '状态',
+                        key: 'status',
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Tag', {
+                                    props: {
+                                        color: params.row.status ? 'error' : 'success'
+                                    }
+                                }, params.row.status ? '失败' : '成功')
+                            ]);
+                        }
+                    },
+                    {
+                        title: '状态信息',
+                        key: 'message'
+                    },
+                    {
+                        title: '执行时间',
+                        key: 'executionTime'
+                    }
+                ],
+                data: [],
+                activeTab: "a",
+                formItem: {}
+            }
+        },
+        created() {
+            this.initTaskList();
+        },
+        computed: {
+            tableHeight() {
+                return document.documentElement.clientHeight - 100
+            }
+        },
+        methods: {
+            reset() {
+                this.query = {
+                    status: "",
+                    index: 1,
+                    size: 10,
+                    beginTime: "",
+                    endTime: "",
+                    reqStr: "",
+                    rspStr: ""
+                }
+            },
+            changeTime(arr) {
+                this.query.beginTime = arr[0];
+                this.query.endTime = arr[1];
+            },
+            initTaskList() {
+                this.query.index = 1;
+                this.getTaskList();
+            },
+            getTaskList() {
+                this.$http.post('/log/list', this.query).then(res => {
+                    this.data = res.data.data;
+                    this.total = res.data.count;
+                    if (this.data.length) {
+                        this.data[0]._highlight = true;
+                        this.changeTableRow(this.data[0]);
+                    }
+                })
+            },
+            exceptionInfo(params) {
+                console.log(params)
+            },
+            changeTableRow(row) {
+                this.formItem = row;
+            },
+            copyInfo() {
+                let val = ""
+                if (this.activeTab === "a") {
+                    val += this.formItem.requestUrl ? `请求地址：${this.formItem.requestUrl}\n` : "";
+                    val += this.formItem.requestType ? `请求方式：${this.formItem.requestType}\n` : "";
+                    val += this.formItem.paramsType ? `参数类型：${this.formItem.requestType}` : "";
+                } else if(this.activeTab === "b") {
+                    val = this.formItem.requestParams;
+                } else if(this.activeTab === "c") {
+                    val = this.formItem.responseParams;
+                } else if(this.activeTab === "b") {
+                    val = this.formItem.exceptionInfo;
+                }
+
+                let textarea = document.createElement("textarea");//创建input对象
+                let currentFocus = document.activeElement;//当前获得焦点的元素
+                document.body.appendChild(textarea);//添加元素
+                textarea.value = val;
+                textarea.focus();
+                if (textarea.setSelectionRange)
+                    textarea.setSelectionRange(0, textarea.value.length);//获取光标起始位置到结束位置
+                else
+                    textarea.select();
+                try {
+                    document.execCommand("copy");//执行复制
+                    this.$Message.success('已复制到剪切板');
+                } catch (e) {
+                    console.log(e)
+                }
+                document.body.removeChild(textarea);//删除元素
+                currentFocus.focus();
+            }
+        }
+    })
+</script>
+</body>
+</html>

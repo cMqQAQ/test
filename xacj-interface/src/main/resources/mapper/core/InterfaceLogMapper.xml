@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jfsoft.interfaces.core.mapper.InterfaceLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jfsoft.interfaces.core.entity.InterfaceLog">
+        <id column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="method" property="method"/>
+        <result column="status" property="status"/>
+        <result column="message" property="message"/>
+        <result column="exception_info" property="exceptionInfo"/>
+        <result column="request_url" property="requestUrl"/>
+        <result column="request_params" property="requestParams"/>
+        <result column="response_params" property="responseParams"/>
+        <result column="execution_time" property="executionTime"/>
+        <result column="module_code" property="moduleCode"/>
+    </resultMap>
+
+    <!-- mssql -->
+    <select id="listSqlServer" parameterType="map" resultMap="BaseResultMap">
+        select top ${end} *
+        from (
+        select row_number() over (order by id asc) as row_id, *
+        from interface_log where module_code = #{moduleCode}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and CONVERT(varchar(100), execution_time, 120) &gt;= CONVERT(datetime, #{beginTime}, 120)
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and CONVERT(varchar(100), execution_time, 120) &lt;= CONVERT(datetime, #{endTime}, 120)
+        </if>
+        <if test="reqStr != null and reqStr != ''">
+            and charindex(#{reqStr}, request_params) > 0
+        </if>
+        <if test="rspStr != null and rspStr != ''">
+            and charindex(#{rspStr}, response_params) > 0
+        </if>
+        ) as t
+        where row_id > ${start}
+        order by execution_time desc
+    </select>
+    <select id="countSqlServer" parameterType="map" resultType="integer">
+        select count(id) from interface_log where module_code = #{moduleCode}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and CONVERT(varchar(100), execution_time, 120) &gt;= CONVERT(datetime, #{beginTime}, 120)
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and CONVERT(varchar(100), execution_time, 120) &lt;= CONVERT(datetime, #{endTime}, 120)
+        </if>
+        <if test="reqStr != null and reqStr != ''">
+            and charindex(#{reqStr}, request_params) > 0
+        </if>
+        <if test="rspStr != null and rspStr != ''">
+            and charindex(#{reqStr}, response_params) > 0
+        </if>
+    </select>
+
+    <!-- mysql -->
+    <select id="listMysql" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from interface_log where module_code = #{moduleCode}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and execution_time &gt;= DATE_FORMAT(#{beginTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and execution_time &lt;= DATE_FORMAT(#{endTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="reqStr != null and reqStr != ''">
+            and instr(#{reqStr}, request_params) > 0
+        </if>
+        <if test="rspStr != null and rspStr != ''">
+            and instr(#{rspStr}, response_params) > 0
+        </if>
+        order by execution_time desc
+        limit #{start}, #{end}
+    </select>
+    <select id="countMysql" parameterType="map" resultType="integer">
+        select count(id) from interface_log where module_code = #{moduleCode}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and execution_time &gt;= DATE_FORMAT(#{beginTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and execution_time &lt;= DATE_FORMAT(#{endTime}, '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="reqStr != null and reqStr != ''">
+            and instr(#{reqStr}, request_params) > 0
+        </if>
+        <if test="rspStr != null and rspStr != ''">
+            and instr(#{rspStr}, response_params) > 0
+        </if>
+    </select>
+
+    <!-- oracle -->
+    <select id="listOracle" parameterType="map" resultMap="BaseResultMap">
+        select *
+        from(
+        select il.*,rownum rn from (
+        select * from interface_log where module_code = #{moduleCode}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            AND EXECUTION_TIME &gt;= TO_DATE(#{beginTime}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND EXECUTION_TIME &lt;= TO_DATE(#{endTime}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="reqStr != null and reqStr != ''">
+            and INSTR(REQUEST_PARAMS, #{reqStr}) > 0
+        </if>
+        <if test="rspStr != null and rspStr != ''">
+            and INSTR(RESPONSE_PARAMS, #{reqStr}) >0
+        </if>
+        )il
+        where rownum &lt;= ${end}
+        )
+        where rn > ${start}
+        order by EXECUTION_TIME desc
+    </select>
+    <select id="countOracle" parameterType="map" resultType="integer">
+        select count(id) from interface_log where module_code = #{moduleCode}
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            AND EXECUTION_TIME &gt;= TO_DATE(#{beginTime}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND EXECUTION_TIME &lt;= TO_DATE(#{endTime}, 'yyyy-mm-dd hh24:mi:ss')
+        </if>
+        <if test="reqStr != null and reqStr != ''">
+            and INSTR(REQUEST_PARAMS, #{reqStr}) > 0
+        </if>
+        <if test="rspStr != null and rspStr != ''">
+            and INSTR(RESPONSE_PARAMS, #{reqStr}) >0
+        </if>
+    </select>
+</mapper>

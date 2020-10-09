@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>接口管理平台</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <link rel="stylesheet" type="text/css" href="/css/iview.css">
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script src="/js/vue-resource.min.js"></script>
+    <script type="text/javascript" src="/js/iview.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <i-table :columns="columns" :data="data"></i-table>
+    <Modal v-model="editBox" draggable scrollable title="编辑任务" @on-ok="submitEdit">
+        <i-form :model="edit" label-width="70">
+            <form-item label="任务Key" label-width="100">
+                <i-input v-model="edit.taskKey" disabled></i-input>
+            </form-item>
+            <form-item label="cron表达式" label-width="100">
+                <i-input v-model="edit.taskCron" placeholder="请输入cron表达式"></i-input>
+            </form-item>
+            <form-item label="任务描述" label-width="100">
+                <i-input v-model="edit.taskDesc" placeholder="请输入任务描述"></i-input>
+            </form-item>
+        </i-form>
+    </Modal>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                columns: [
+                    {
+                        title: '任务Key',
+                        key: 'taskKey'
+                    },
+                    {
+                        title: '描述',
+                        key: 'taskDesc'
+                    },
+                    {
+                        title: 'cron表达式',
+                        key: 'taskCron'
+                    }, {
+                        title: '运行状态',
+                        key: 'initStartFlag',
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Tag', {
+                                    props: {
+                                        color: params.row.startFlag ? 'success' : 'error'
+                                    }
+                                }, params.row.startFlag ? '运行中' : '已停止'),
+
+                            ]);
+                        }
+                    }, {
+                        title: '所属模块',
+                        key: 'moduleName',
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Tag', {
+                                    props: {
+                                        color: 'blue'
+                                    }
+                                }, params.row.moduleCode),
+
+                            ]);
+                        }
+                    }, {
+                        title: '操作',
+                        key: 'startFlag',
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Button', {
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    props: {
+                                        type: 'primary',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.runTask(params)
+                                        }
+                                    }
+                                }, '调用'),
+                                h('Button', {
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    props: {
+                                        type: params.row.startFlag ? 'error' : 'success',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.startOrStop(params)
+                                        }
+                                    }
+                                }, params.row.startFlag ? '停止' : '启动'),
+                                h('Button', {
+                                    style: {
+                                        marginRight: '5px'
+                                    },
+                                    props: {
+                                        type: 'warning',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.restart(params)
+                                        }
+                                    }
+                                }, '重启'),
+                                h('Button', {
+                                    props: {
+                                        type: 'primary',
+                                        size: 'small'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.openEditBox(params)
+                                        }
+                                    }
+                                }, '编辑')
+                            ]);
+                        }
+                    }
+                ],
+                data: [],
+                editBox: false,
+                edit: {
+                    taskKey: '',
+                    taskCron: '',
+                    taskDesc: ''
+                }
+            }
+        },
+        created() {
+            this.getTaskList();
+        },
+        methods: {
+            getTaskList() {
+                this.$http.get('/scheduled/taskList').then(res => {
+                    console.log(res.data.data)
+                    this.data = res.data.data;
+                })
+            },
+            startOrStop(params) {
+                let url;
+                if (params.row.startFlag) {
+                    url = '/scheduled/stop';
+                } else {
+                    url = '/scheduled/start';
+                }
+                this.$http.get(url + '?taskKey=' + params.row.taskKey).then(res => {
+                    console.log(res.data.msg)
+                    this.$Message.success(res.data.msg);
+                    this.getTaskList();
+                })
+            },
+            getLog(params) {
+                this.$http.get('/scheduled/printlnTask').then(res => {
+                    console.log(res.data.data)
+                    this.$Message.success(res.data.data);
+                })
+            },
+            openEditBox(params) {
+                this.editBox = true
+                this.edit.taskKey = params.row.taskKey
+                this.edit.taskCron = params.row.taskCron
+                this.edit.taskDesc = params.row.taskDesc
+
+            },
+            submitEdit() {
+                console.log(this.edit)
+                this.$http.post('/scheduled/editTask', this.edit).then(res => {
+                    this.edit.taskKey = ""
+                    this.edit.taskCron = ""
+                    this.edit.taskDesc = ""
+                    this.$Message.success("修改成功，重启任务生效!");
+                    this.editBox = false
+                    this.getTaskList();
+
+                }).catch(() => {
+                    this.edit.taskKey = ""
+                    this.edit.taskCron = ""
+                    this.edit.taskDesc = ""
+                    this.$Message.success("修改失败!");
+                    this.editBox = false
+                })
+
+            },
+            restart(params) {
+                this.$http.get('/scheduled/restart' + '?taskKey=' + params.row.taskKey).then(res => {
+                    console.log(res.data.msg)
+                    this.$Message.success(res.data.msg);
+                    this.getTaskList();
+                })
+            },
+            runTask(params) {
+                this.$http.get('/scheduled/run' + '?taskKey=' + params.row.taskKey).then(res => {
+                    console.log(res.data.msg)
+                    this.$Message.success(res.data.msg);
+                    this.getTaskList();
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>

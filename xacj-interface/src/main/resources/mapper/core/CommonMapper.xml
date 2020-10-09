@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jfsoft.interfaces.core.mapper.CommonMapper">
+    <!-- 通用SQL执行 -->
+    <select id="execSql" resultType="map">
+        ${_parameter}
+    </select>
+
+    <!-- 通用存储过程执行 -->
+    <select id="execProc" parameterType="map" statementType="CALLABLE">
+        {call ${procName}(${params})}
+    </select>
+</mapper>

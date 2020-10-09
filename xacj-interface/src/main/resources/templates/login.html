@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <title>接口管理平台</title>
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <link rel="stylesheet" type="text/css" href="/css/iview.css">
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script src="/js/vue-resource.min.js"></script>
+    <script type="text/javascript" src="/js/iview.min.js"></script>
+    <style>
+        #app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/img/login_bg.jpg') no-repeat;
+            /*background: url('../../static/images/home-bg.jpg') no-repeat;*/
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+
+        .login-box {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            width: 400px;
+            padding: 25px 40px;
+            box-sizing: border-box;
+            margin: -190px 0 0 -200px;
+            border: 1px solid #e2e2e2;
+        }
+
+        .login input,
+        .ivu-btn {
+            width: 100%;
+            display: block;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .ivu-form-item {
+            margin: 20px 0 30px;
+        }
+
+        .btn-area .ivu-form-item-content {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ivu-btn {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <Row type="flex" align="middle" justify="center">
+            <i-col>
+                <i-card class="login-box">
+                    <div @keyup.enter="handleSubmit('loginData')">
+                        <h1>接口管理平台 v<span th:text="${version}"></span></h1>
+                        <i-form :model="loginData" ref="loginData" :rules="ruleValidate">
+                            <form-item prop="acct">
+                                <i-input type="text" v-model="loginData.acct" placeholder="请输入用户名"></i-input>
+                            </form-item>
+                            <form-item prop="pass">
+                                <i-input type="password" v-model="loginData.pass" placeholder="请输入密码"></i-input>
+                            </form-item>
+                            <form-item class="btn-area">
+                                <i-button type="primary" @click="handleSubmit('loginData')" :loading="loading">登录
+                                </i-button>
+                            </form-item>
+                        </i-form>
+                    </div>
+                </i-card>
+            </i-col>
+        </Row>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    loading: false,
+                    loginData: {
+                        acct: '',
+                        pass: ''
+                    },
+                    ruleValidate: {
+                        acct: [
+                            { required: true, message: '账号不能为空', trigger: 'blur' }
+                        ],
+                        pass: [
+                            { required: true, message: '密码不能为空', trigger: 'blur' }
+                        ]
+                    }
+                }
+            },
+            created() {
+
+            },
+            methods: {
+                handleSubmit(name) {
+                    this.$refs[name].validate((valid) => {
+                        if (valid) {
+                            if (this.loginData.acct === "admin" && this.loginData.pass === "jfyt201221") {
+                                this.$Message.success('登录成功!');
+                                window.location.href = '/index';
+                            }
+                            else {
+                                this.$Message.error('用户名或密码错误!')
+                            }
+                        } else {
+                            this.$Message.error('用户名或密码不能为空!')
+                        }
+                    })
+                },
+                handleReset(name) {
+                    this.$refs[name].resetFields();
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

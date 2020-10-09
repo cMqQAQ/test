@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>接口管理平台</title>
+    <link rel="stylesheet" type="text/css" href="/css/iview.css">
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <script src="/js/vue-resource.min.js"></script>
+    <script type="text/javascript" src="/js/iview.min.js"></script>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+        .ivu-layout-header {
+            display: flex;
+            border-bottom: 1px solid #dcdee2;
+        }
+
+        .ivu-layout-header h3 {
+            margin: 0 40px;
+            display: inline-block;
+        }
+
+        .ivu-layout-header {
+            background: white;
+            height: 60px;
+            line-height: 60px;
+            padding: 0;
+        }
+
+        .ivu-layout-content {
+            margin-top: 20px;
+        }
+
+        .power {
+            font-size: 24px;
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <i-layout>
+        <i-header>
+            <h3>金风易通接口管理平台 {{version}}</h3>
+            <i-menu mode="horizontal" theme="light" :active-name="activeMenu" @on-select="changeMenu">
+                <menu-item v-for="item in menuList" :name="item.id">
+                    <Icon :type="item.icon"></Icon>
+                    {{item.name}}
+                </menu-item>
+            </i-menu>
+            <Icon type="md-power" class="power" @click="logout"/>
+        </i-header>
+        <i-content>
+            <iframe :src="iframeUrl" frameborder="0" style="width: 100%;height: calc(100vh - 90px)"></iframe>
+        </i-content>
+    </i-layout>
+
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                activeMenu: "",
+                menuList: [
+                    {
+                        id: 1,
+                        icon: "md-alarm",
+                        name: "定时任务",
+                        url: "/task"
+                    },
+                    {
+                        id: 2,
+                        icon: "md-clipboard",
+                        name: "接口日志",
+                        url: "/log"
+                    },
+                    {
+                        id: 3,
+                        icon: "md-desktop",
+                        name: "SQL监控",
+                        url: "/druid"
+                    },
+                    {
+                        id: 4,
+                        icon: "md-globe",
+                        name: "HTTP调试",
+                        url: "/doc.html"
+                    },
+                    {
+                        id: 5,
+                        icon: "ios-people",
+                        name: "WebService",
+                        url: "/webservice"
+                    }, {
+                        id: 6,
+                        icon: "ios-flag-outline",
+                        name: "CSLIS文档",
+                        url: "/doc/cslis.pdf"
+                    }
+                ],
+                iframeUrl: "",
+                version: ""
+            }
+        },
+        created() {
+            if (localStorage.activeMenu) {
+                this.activeMenu = Number(localStorage.activeMenu);
+                const menu = this.menuList.filter(item => item.id == this.activeMenu);
+                this.iframeUrl = menu[0].url
+            } else {
+                this.activeMenu = this.menuList[0].id;
+                this.iframeUrl = this.menuList[0].url;
+            }
+            this.getVersion();
+        },
+        methods: {
+            changeMenu(e) {
+                localStorage.activeMenu = e;
+                const menu = this.menuList.filter(item => item.id == e);
+                this.iframeUrl = menu[0].url
+            },
+            getVersion() {
+                this.$http.get('/version').then(res => {
+                    this.version = res.data.data
+                })
+            },
+            //  注销
+            logout() {
+                this.$Modal.warning({
+                    title: '提醒',
+                    content: '是否退出系统',
+                    onOk: () => {
+                        localStorage.clear();
+                        window.location.href = '/'
+                    },
+                    onCancel: () => {
+
+                    }
+                });
+
+            }
+        }
+    })
+</script>
+</body>
+</html>

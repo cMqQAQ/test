@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jfsoft.interfaces.business.mapper.PatientBaseMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jfsoft.interfaces.business.entity.PatientBase">
+        <id column="Id" property="Id" />
+        <result column="HID" property="hid" />
+        <result column="PID" property="pid" />
+        <result column="Name" property="Name" />
+        <result column="Age" property="Age" />
+        <result column="AuCode" property="AuCode" />
+        <result column="Sex" property="Sex" />
+        <result column="BedNum" property="BedNum" />
+        <result column="Department" property="Department" />
+        <result column="Doctor" property="Doctor" />
+        <result column="Sfname" property="Sfname" />
+        <result column="Sfcode" property="Sfcode" />
+        <result column="Sfmoney" property="Sfmoney" />
+        <result column="Sftime" property="Sftime" />
+        <result column="SfDate" property="SfDate" />
+        <result column="fph" property="fph" />
+        <result column="Lczd" property="Lczd" />
+        <result column="Barcode" property="Barcode" />
+        <result column="Pattype" property="Pattype" />
+        <result column="HisID" property="HisID" />
+        <result column="PyCode" property="PyCode" />
+        <result column="TestTypeCode" property="TestTypeCode" />
+        <result column="feeMark" property="feeMark" />
+        <result column="PatInfoID" property="PatInfoID" />
+        <result column="InputCode" property="InputCode" />
+        <result column="backflag" property="backflag" />
+        <result column="Sampletime" property="Sampletime" />
+        <result column="BarCodetime" property="BarCodetime" />
+        <result column="SampleUser" property="SampleUser" />
+        <result column="BarCodeUser" property="BarCodeUser" />
+        <result column="SampleState" property="SampleState" />
+        <result column="caseid" property="caseid" />
+        <result column="Drugmemo" property="Drugmemo" />
+        <result column="Ordersmemo" property="Ordersmemo" />
+        <result column="Samplesource" property="Samplesource" />
+        <result column="rejectOpt" property="rejectOpt" />
+        <result column="rejecttime" property="rejecttime" />
+        <result column="sampletype" property="sampletype" />
+        <result column="reciveplace" property="reciveplace" />
+        <result column="SamplePosition" property="SamplePosition" />
+        <result column="SecurityLevel" property="SecurityLevel" />
+        <result column="Phonenumber" property="Phonenumber" />
+        <result column="BirthDate" property="BirthDate" />
+        <result column="IdCardNumber" property="IdCardNumber" />
+        <result column="Company" property="Company" />
+        <result column="HospitalTimes" property="HospitalTimes" />
+        <result column="PrintBarcodeTime" property="PrintBarcodeTime" />
+        <result column="PrintBarcodeUser" property="PrintBarcodeUser" />
+        <result column="ReciveUser" property="ReciveUser" />
+        <result column="ReciveTime" property="ReciveTime" />
+        <result column="Infectious" property="Infectious" />
+        <result column="TrafficUser" property="TrafficUser" />
+        <result column="TrafficTime" property="TrafficTime" />
+        <result column="Hisinterface_ID" property="hisinterfaceId" />
+        <result column="sampleDes" property="sampleDes" />
+        <result column="confirmtime" property="confirmtime" />
+        <result column="confirmuser" property="confirmuser" />
+        <result column="checkuser" property="checkuser" />
+        <result column="PresetCode" property="PresetCode" />
+        <result column="ReceiptID" property="ReceiptID" />
+        <result column="BarcodeUserCode" property="BarcodeUserCode" />
+        <result column="confirmuserCode" property="confirmuserCode" />
+        <result column="SampleUserCode" property="SampleUserCode" />
+        <result column="trafficUserCode" property="trafficUserCode" />
+        <result column="barcodechecker" property="barcodechecker" />
+        <result column="identity1" property="identity1" />
+    </resultMap>
+
+</mapper>

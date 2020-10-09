@@ -1,0 +1,12 @@
+${AnsiColor.BRIGHT_BLUE}
+       _ ______ _____  ____  ______ _______
+      | |  ____/ ____|/ __ \|  ____|__   __|
+      | | |__ | (___ | |  | | |__     | |
+  _   | |  __| \___ \| |  | |  __|    | |
+ | |__| | |    ____) | |__| | |       | |
+  \____/|_|   |_____/ \____/|_|       |_|
+
+${AnsiColor.BRIGHT_GREEN}
+App Frame   Version: 0.0.1
+Spring Boot Version: ${spring-boot.version}${spring-boot.formatted-version}
+${AnsiColor.BLACK}
